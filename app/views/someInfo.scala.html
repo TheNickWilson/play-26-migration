@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,26 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package generators
+@import config.FrontendAppConfig
 
-import models._
-import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.{Arbitrary, Gen}
+@(appConfig: FrontendAppConfig)(implicit request: Request[_], messages: Messages)
 
-trait ModelGenerators {
+@main_template(
+    title = messages("someInfo.title"),
+    appConfig = appConfig,
+    bodyClasses = None) {
 
-  implicit lazy val arbitrarySomeQuestion: Arbitrary[SomeQuestion] =
-    Arbitrary {
-      for {
-        field1 <- arbitrary[String]
-        field2 <- arbitrary[String]
-      } yield SomeQuestion(field1, field2)
-    }
+    @components.back_link()
 
-  implicit lazy val arbitrarySomeOptions: Arbitrary[SomeOptions] =
-    Arbitrary {
-      Gen.oneOf(SomeOptions.values.toSeq)
-    }
+    @components.heading("someInfo.heading")
 }

@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package generators
+package views
 
-import models._
-import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.{Arbitrary, Gen}
+import views.behaviours.ViewBehaviours
+import views.html.someInfo
 
-trait ModelGenerators {
+class SomeInfoViewSpec extends ViewBehaviours {
 
-  implicit lazy val arbitrarySomeQuestion: Arbitrary[SomeQuestion] =
-    Arbitrary {
-      for {
-        field1 <- arbitrary[String]
-        field2 <- arbitrary[String]
-      } yield SomeQuestion(field1, field2)
-    }
+  val messageKeyPrefix = "someInfo"
 
-  implicit lazy val arbitrarySomeOptions: Arbitrary[SomeOptions] =
-    Arbitrary {
-      Gen.oneOf(SomeOptions.values.toSeq)
-    }
+  def createView = () => someInfo(frontendAppConfig)(fakeRequest, messages)
+
+  "SomeInfo view" must {
+    behave like normalPage(createView, messageKeyPrefix)
+
+    behave like pageWithBackLink(createView)
+  }
 }

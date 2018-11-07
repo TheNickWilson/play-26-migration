@@ -14,24 +14,12 @@
  * limitations under the License.
  */
 
-package generators
+package models
 
-import models._
-import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.{Arbitrary, Gen}
+import play.api.libs.json._
 
-trait ModelGenerators {
+case class SomeQuestion (field1: String, field2: String)
 
-  implicit lazy val arbitrarySomeQuestion: Arbitrary[SomeQuestion] =
-    Arbitrary {
-      for {
-        field1 <- arbitrary[String]
-        field2 <- arbitrary[String]
-      } yield SomeQuestion(field1, field2)
-    }
-
-  implicit lazy val arbitrarySomeOptions: Arbitrary[SomeOptions] =
-    Arbitrary {
-      Gen.oneOf(SomeOptions.values.toSeq)
-    }
+object SomeQuestion {
+  implicit val format = Json.format[SomeQuestion]
 }

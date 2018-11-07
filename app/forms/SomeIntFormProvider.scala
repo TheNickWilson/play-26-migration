@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-package generators
+package forms
 
-import models._
-import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.{Arbitrary, Gen}
+import javax.inject.Inject
 
-trait ModelGenerators {
+import forms.mappings.Mappings
+import play.api.data.Form
 
-  implicit lazy val arbitrarySomeQuestion: Arbitrary[SomeQuestion] =
-    Arbitrary {
-      for {
-        field1 <- arbitrary[String]
-        field2 <- arbitrary[String]
-      } yield SomeQuestion(field1, field2)
-    }
+class SomeIntFormProvider @Inject() extends Mappings {
 
-  implicit lazy val arbitrarySomeOptions: Arbitrary[SomeOptions] =
-    Arbitrary {
-      Gen.oneOf(SomeOptions.values.toSeq)
-    }
+  def apply(): Form[Int] =
+    Form(
+      "value" -> int(
+        "someInt.error.required",
+        "someInt.error.wholeNumber",
+        "someInt.error.nonNumeric")
+          .verifying(inRange(0, Int.MaxValue, "someInt.error.outOfRange"))
+    )
 }

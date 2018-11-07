@@ -42,3 +42,42 @@ site.textarea.char_limit = (Limit is {0} characters)
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
+
+someInfo.title = someInfo
+someInfo.heading = someInfo
+
+someInt.title = someInt
+someInt.heading = someInt
+someInt.checkYourAnswersLabel = someInt
+someInt.error.nonNumeric = Enter your someInt using numbers
+someInt.error.required = Enter your someInt
+someInt.error.wholeNumber = Enter your someInt using whole numbers
+someInt.error.outOfRange = SomeInt must be between {0} and {1}
+
+someOptions.title = someOptions
+someOptions.heading = someOptions
+someOptions.option1 = Option 1
+someOptions.option2 = Option 2
+someOptions.checkYourAnswersLabel = someOptions
+someOptions.error.required = Select someOptions
+
+someQuestion.title = someQuestion
+someQuestion.heading = someQuestion
+someQuestion.field1 = Field 1
+someQuestion.field2 = Field 2
+someQuestion.checkYourAnswersLabel = someQuestion
+someQuestion.error.field1.required = Enter field1
+someQuestion.error.field2.required = Enter field2
+someQuestion.error.field1.length = field1 must be 100 characters or less
+someQuestion.error.field2.length = field2 must be 100 characters or less
+
+someString.title = someString
+someString.heading = someString
+someString.checkYourAnswersLabel = someString
+someString.error.required = Enter someString
+someString.error.length = SomeString must be 100 characters or less
+
+yesOrNo.title = yesOrNo
+yesOrNo.heading = yesOrNo
+yesOrNo.checkYourAnswersLabel = yesOrNo
+yesOrNo.error.required = Select yes if yesOrNo

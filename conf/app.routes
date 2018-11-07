@@ -11,3 +11,30 @@ GET        /this-service-has-been-reset                 controllers.SessionExpir
 GET        /check-your-answers                          controllers.CheckYourAnswersController.onPageLoad
 
 GET        /unauthorised                                controllers.UnauthorisedController.onPageLoad
+
+GET        /someInfo                       controllers.SomeInfoController.onPageLoad()
+
+GET        /someInt               controllers.SomeIntController.onPageLoad(mode: Mode = NormalMode)
+POST       /someInt               controllers.SomeIntController.onSubmit(mode: Mode = NormalMode)
+GET        /changeSomeInt                        controllers.SomeIntController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeSomeInt                        controllers.SomeIntController.onSubmit(mode: Mode = CheckMode)
+
+GET        /someOptions               controllers.SomeOptionsController.onPageLoad(mode: Mode = NormalMode)
+POST       /someOptions               controllers.SomeOptionsController.onSubmit(mode: Mode = NormalMode)
+GET        /changeSomeOptions                  controllers.SomeOptionsController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeSomeOptions                  controllers.SomeOptionsController.onSubmit(mode: Mode = CheckMode)
+
+GET        /someQuestion                        controllers.SomeQuestionController.onPageLoad(mode: Mode = NormalMode)
+POST       /someQuestion                        controllers.SomeQuestionController.onSubmit(mode: Mode = NormalMode)
+GET        /changeSomeQuestion                  controllers.SomeQuestionController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeSomeQuestion                  controllers.SomeQuestionController.onSubmit(mode: Mode = CheckMode)
+
+GET        /someString                        controllers.SomeStringController.onPageLoad(mode: Mode = NormalMode)
+POST       /someString                        controllers.SomeStringController.onSubmit(mode: Mode = NormalMode)
+GET        /changeSomeString                  controllers.SomeStringController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeSomeString                  controllers.SomeStringController.onSubmit(mode: Mode = CheckMode)
+
+GET        /yesOrNo                        controllers.YesOrNoController.onPageLoad(mode: Mode = NormalMode)
+POST       /yesOrNo                        controllers.YesOrNoController.onSubmit(mode: Mode = NormalMode)
+GET        /changeYesOrNo                  controllers.YesOrNoController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeYesOrNo                  controllers.YesOrNoController.onSubmit(mode: Mode = CheckMode)

@@ -20,4 +20,19 @@ import org.scalacheck.Arbitrary
 import pages._
 
 trait PageGenerators {
+
+  implicit lazy val arbitraryYesOrNoPage: Arbitrary[YesOrNoPage.type] =
+    Arbitrary(YesOrNoPage)
+
+  implicit lazy val arbitrarySomeStringPage: Arbitrary[SomeStringPage.type] =
+    Arbitrary(SomeStringPage)
+
+  implicit lazy val arbitrarySomeQuestionPage: Arbitrary[SomeQuestionPage.type] =
+    Arbitrary(SomeQuestionPage)
+
+  implicit lazy val arbitrarySomeOptionsPage: Arbitrary[SomeOptionsPage.type] =
+    Arbitrary(SomeOptionsPage)
+
+  implicit lazy val arbitrarySomeIntPage: Arbitrary[SomeIntPage.type] =
+    Arbitrary(SomeIntPage)
 }

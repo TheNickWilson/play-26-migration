@@ -26,6 +26,11 @@ trait CacheMapGenerator {
   self: Generators =>
 
   val generators: Seq[Gen[(Page, JsValue)]] =
+    arbitrary[(YesOrNoPage.type, JsValue)] ::
+    arbitrary[(SomeStringPage.type, JsValue)] ::
+    arbitrary[(SomeQuestionPage.type, JsValue)] ::
+    arbitrary[(SomeOptionsPage.type, JsValue)] ::
+    arbitrary[(SomeIntPage.type, JsValue)] ::
     Nil
 
   implicit lazy val arbitraryCacheMap: Arbitrary[CacheMap] =
