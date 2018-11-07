@@ -17,7 +17,6 @@
 package controllers
 
 import javax.inject.Inject
-
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -25,7 +24,7 @@ import connectors.DataCacheConnector
 import controllers.actions._
 import config.FrontendAppConfig
 import forms.YesOrNoFormProvider
-import models.Mode
+import models.{Mode, UserAnswers}
 import pages.YesOrNoPage
 import navigation.Navigator
 import views.html.yesOrNo
@@ -44,10 +43,10 @@ class YesOrNoController @Inject()(appConfig: FrontendAppConfig,
 
   val form: Form[Boolean] = formProvider()
 
-  def onPageLoad(mode: Mode) = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode) = (identify andThen getData) {
     implicit request =>
 
-      val preparedForm = request.userAnswers.get(YesOrNoPage) match {
+      val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.internalId)).get(YesOrNoPage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
@@ -55,14 +54,14 @@ class YesOrNoController @Inject()(appConfig: FrontendAppConfig,
       Ok(yesOrNo(appConfig, preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode) = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode) = (identify andThen getData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
           Future.successful(BadRequest(yesOrNo(appConfig, formWithErrors, mode))),
         (value) => {
-          val updatedAnswers = request.userAnswers.set(YesOrNoPage, value)
+          val updatedAnswers = request.userAnswers.getOrElse(UserAnswers(request.internalId)).set(YesOrNoPage, value)
 
           dataCacheConnector.save(updatedAnswers.cacheMap).map(
             _ =>
