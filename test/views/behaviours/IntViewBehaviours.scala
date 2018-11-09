@@ -23,7 +23,8 @@ trait IntViewBehaviours extends QuestionViewBehaviours[Int] {
 
   val number = 123
 
-  def intPage(createView: (Form[Int]) => HtmlFormat.Appendable,
+  def intPage(form: Form[Int],
+              createView: Form[Int] => HtmlFormat.Appendable,
               messageKeyPrefix: String,
               expectedFormAction: String) = {
 

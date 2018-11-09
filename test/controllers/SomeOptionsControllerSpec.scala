@@ -67,7 +67,7 @@ class SomeOptionsControllerSpec extends ControllerSpecBase {
       status(result) mustEqual OK
 
       contentAsString(result) mustEqual
-        view(frontendAppConfig, form, NormalMode)(fakeRequest, messages).toString
+        view(form, NormalMode)(fakeRequest, messages).toString
     }
 
     "populate the view correctly on a GET when the question has previously been answered" in {
@@ -85,7 +85,7 @@ class SomeOptionsControllerSpec extends ControllerSpecBase {
       status(result) mustEqual OK
 
       contentAsString(result) mustEqual
-        view(frontendAppConfig, form.fill(SomeOptions.values.head), NormalMode)(fakeRequest, messages).toString
+        view(form.fill(SomeOptions.values.head), NormalMode)(fakeRequest, messages).toString
     }
 
     "redirect to the next page when valid data is submitted" in {
@@ -123,7 +123,7 @@ class SomeOptionsControllerSpec extends ControllerSpecBase {
       status(result) mustEqual BAD_REQUEST
 
       contentAsString(result) mustEqual
-        view(frontendAppConfig, boundForm, NormalMode)(fakeRequest, messages).toString
+        view(boundForm, NormalMode)(fakeRequest, messages).toString
     }
 
     "redirect to Session Expired for a GET if no existing data is found" in {

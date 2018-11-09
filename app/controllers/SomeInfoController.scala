@@ -19,13 +19,12 @@ package controllers
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import controllers.actions._
-import config.FrontendAppConfig
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import views.html.SomeInfoView
 
 import scala.concurrent.ExecutionContext
 
-class SomeInfoController @Inject()(appConfig: FrontendAppConfig,
+class SomeInfoController @Inject()(
                                          override val messagesApi: MessagesApi,
                                          identify: IdentifierAction,
                                          getData: DataRetrievalAction,
@@ -36,6 +35,6 @@ class SomeInfoController @Inject()(appConfig: FrontendAppConfig,
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      Ok(view(appConfig))
+      Ok(view())
   }
 }

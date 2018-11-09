@@ -37,7 +37,7 @@ class IndexControllerSpec extends ControllerSpecBase {
       status(result) mustEqual OK
 
       contentAsString(result) mustEqual
-        view(frontendAppConfig)(fakeRequest, messages).toString
+        view()(fakeRequest, messages).toString
     }
   }
 }

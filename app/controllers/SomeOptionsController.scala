@@ -16,7 +16,6 @@
 
 package controllers
 
-import config.FrontendAppConfig
 import controllers.actions._
 import forms.SomeOptionsFormProvider
 import javax.inject.Inject
@@ -32,7 +31,6 @@ import views.html.SomeOptionsView
 import scala.concurrent.{ExecutionContext, Future}
 
 class SomeOptionsController @Inject()(
-                                       appConfig: FrontendAppConfig,
                                        override val messagesApi: MessagesApi,
                                        sessionRepository: SessionRepository,
                                        navigator: Navigator,
@@ -54,7 +52,7 @@ class SomeOptionsController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(appConfig, preparedForm, mode))
+      Ok(view(preparedForm, mode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -62,7 +60,7 @@ class SomeOptionsController @Inject()(
 
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(view(appConfig, formWithErrors, mode))),
+          Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value => {
           val updatedAnswers = request.userAnswers.set(SomeOptionsPage, value)

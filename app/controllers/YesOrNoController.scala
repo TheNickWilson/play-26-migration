@@ -20,7 +20,6 @@ import javax.inject.Inject
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import controllers.actions._
-import config.FrontendAppConfig
 import forms.YesOrNoFormProvider
 import models.{Mode, UserAnswers}
 import pages.YesOrNoPage
@@ -31,7 +30,7 @@ import views.html.YesOrNoView
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class YesOrNoController @Inject()(appConfig: FrontendAppConfig,
+class YesOrNoController @Inject()(
                                   override val messagesApi: MessagesApi,
                                   sessionRepository: SessionRepository,
                                   navigator: Navigator,
@@ -53,7 +52,7 @@ class YesOrNoController @Inject()(appConfig: FrontendAppConfig,
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(appConfig, preparedForm, mode))
+      Ok(view(preparedForm, mode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
@@ -61,7 +60,7 @@ class YesOrNoController @Inject()(appConfig: FrontendAppConfig,
 
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(view(appConfig, formWithErrors, mode))),
+          Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value => {
           val updatedAnswers = request.userAnswers.getOrElse(UserAnswers(request.internalId)).set(YesOrNoPage, value)

@@ -16,15 +16,14 @@
 
 package controllers
 
+import controllers.actions._
+import forms.SomeStringFormProvider
 import javax.inject.Inject
+import models.Mode
+import navigation.Navigator
+import pages.SomeStringPage
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
-import controllers.actions._
-import config.FrontendAppConfig
-import forms.SomeStringFormProvider
-import models.Mode
-import pages.SomeStringPage
-import navigation.Navigator
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import views.html.SomeStringView
@@ -32,7 +31,6 @@ import views.html.SomeStringView
 import scala.concurrent.{ExecutionContext, Future}
 
 class SomeStringController @Inject()(
-                                      appConfig: FrontendAppConfig,
                                       override val messagesApi: MessagesApi,
                                       sessionRepository: SessionRepository,
                                       navigator: Navigator,
@@ -54,7 +52,7 @@ class SomeStringController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(appConfig, preparedForm, mode))
+      Ok(view(preparedForm, mode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -62,7 +60,7 @@ class SomeStringController @Inject()(
 
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(view(appConfig, formWithErrors, mode))),
+          Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value => {
           val updatedAnswers = request.userAnswers.set(SomeStringPage, value)

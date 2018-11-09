@@ -16,7 +16,6 @@
 
 package controllers
 
-import config.FrontendAppConfig
 import controllers.actions._
 import forms.SomeQuestionFormProvider
 import javax.inject.Inject
@@ -31,7 +30,7 @@ import views.html.SomeQuestionView
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SomeQuestionController @Inject()(appConfig: FrontendAppConfig,
+class SomeQuestionController @Inject()(
                                        override val messagesApi: MessagesApi,
                                        sessionRepository: SessionRepository,
                                        navigator: Navigator,
@@ -53,7 +52,7 @@ class SomeQuestionController @Inject()(appConfig: FrontendAppConfig,
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(appConfig, preparedForm, mode))
+      Ok(view(preparedForm, mode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -61,7 +60,7 @@ class SomeQuestionController @Inject()(appConfig: FrontendAppConfig,
 
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(view(appConfig, formWithErrors, mode))),
+          Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value => {
           val updatedAnswers = request.userAnswers.set(SomeQuestionPage, value)

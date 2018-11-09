@@ -25,7 +25,7 @@ import play.api.libs.json.{JsString, Json}
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import views.html.{SomeIntView, SomeStringView}
+import views.html.SomeStringView
 
 class SomeStringControllerSpec extends ControllerSpecBase {
 
@@ -51,7 +51,7 @@ class SomeStringControllerSpec extends ControllerSpecBase {
       status(result) mustEqual OK
 
       contentAsString(result) mustEqual
-        view(frontendAppConfig, form, NormalMode)(fakeRequest, messages).toString
+        view(form, NormalMode)(fakeRequest, messages).toString
     }
 
     "populate the view correctly on a GET when the question has previously been answered" in {
@@ -62,14 +62,14 @@ class SomeStringControllerSpec extends ControllerSpecBase {
 
       val request = FakeRequest(GET, someStringRoute)
 
-      val view = application.injector.instanceOf[SomeIntView]
+      val view = application.injector.instanceOf[SomeStringView]
 
       val result = route(application, request).value
 
       status(result) mustEqual OK
 
       contentAsString(result) mustEqual
-        view(frontendAppConfig, form.fill("answer"), NormalMode)(fakeRequest, messages).toString
+        view(form.fill("answer"), NormalMode)(fakeRequest, messages).toString
     }
 
     "redirect to the next page when valid data is submitted" in {
@@ -99,14 +99,14 @@ class SomeStringControllerSpec extends ControllerSpecBase {
 
       val boundForm = form.bind(Map("value" -> ""))
 
-      val view = application.injector.instanceOf[SomeIntView]
+      val view = application.injector.instanceOf[SomeStringView]
 
       val result = route(application, request).value
 
       status(result) mustEqual BAD_REQUEST
 
       contentAsString(result) mustEqual
-        view(frontendAppConfig, boundForm, NormalMode)(fakeRequest, messages).toString
+        view(boundForm, NormalMode)(fakeRequest, messages).toString
     }
 
     "redirect to Session Expired for a GET if no existing data is found" in {

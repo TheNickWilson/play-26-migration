@@ -27,7 +27,8 @@ trait QuestionViewBehaviours[A] extends ViewBehaviours {
 
   val form: Form[A]
 
-  def pageWithTextFields(createView: (Form[A]) => HtmlFormat.Appendable,
+  def pageWithTextFields(form: Form[A],
+                         createView: Form[A] => HtmlFormat.Appendable,
                          messageKeyPrefix: String,
                          expectedFormAction: String,
                          fields: String*) = {
