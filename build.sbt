@@ -14,6 +14,12 @@ lazy val root = (project in file("."))
   .settings(
     name := appName,
     RoutesKeys.routesImport += "models._",
+    TwirlKeys.templateImports ++= Seq(
+      "play.twirl.api.HtmlFormat",
+      "play.twirl.api.HtmlFormat._",
+      "uk.gov.hmrc.play.views.html.helpers._",
+      "uk.gov.hmrc.play.views.html.layouts._"
+    ),
     PlayKeys.playDefaultPort := 9001,
     ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*filters.*;.*handlers.*;.*components.*;.*repositories.*;" +
       ".*BuildInfo.*;.*javascript.*;.*FrontendAuditConnector.*;.*Routes.*;.*GuiceInjector;" +
@@ -21,7 +27,8 @@ lazy val root = (project in file("."))
     ScoverageKeys.coverageMinimum := 80,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
-    scalacOptions ++= Seq("-Xfatal-warnings", "-feature"),
+    scalacOptions ++= Seq("-feature"),
+    //scalacOptions ++= Seq("-Xfatal-warnings", "-feature"),
     libraryDependencies ++= AppDependencies(),
     retrieveManaged := true,
     evictionWarningOptions in update :=
@@ -37,7 +44,7 @@ lazy val root = (project in file("."))
         group(Seq("javascripts/show-hide-content.js", "javascripts/play26frontend.js"))
     ),
     // prevent removal of unused code which generates warning errors due to use of third-party libs
-    UglifyKeys.compressOptions := Seq("unused=false", "dead_code=false"),
+    uglifyCompressOptions := Seq("unused=false", "dead_code=false"),
     pipelineStages := Seq(digest),
     // below line required to force asset pipeline to operate in dev rather than only prod
     pipelineStages in Assets := Seq(concat,uglify),

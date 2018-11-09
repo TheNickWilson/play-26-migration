@@ -17,28 +17,35 @@
 @import config.FrontendAppConfig
 @import uk.gov.hmrc.play.views.html._
 @import controllers.routes._
+@import models.SomeOptions
 @import models.Mode
 @import views.ViewUtils._
+
+@this(
+    main_template: MainTemplate,
+    formHelper: FormWithCSRF
+)
 
 @(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
 
 @main_template(
-    title = s"${errorPrefix(form)} ${messages("someInt.title")}",
+    title = s"${errorPrefix(form)} ${messages("someOptions.title")}",
     appConfig = appConfig,
     bodyClasses = None) {
 
-    @helpers.form(action = SomeIntController.onSubmit(mode), 'autoComplete -> "off") {
+    @formHelper(action = SomeOptionsController.onSubmit(mode), 'autoComplete -> "off") {
 
         @components.back_link()
 
         @components.error_summary(form.errors)
 
-        @components.heading("someInt.heading")
+        @components.heading("someOptions.heading")
 
-        @components.input_text(
+        @components.input_radio(
             field = form("value"),
-            label = messages("someInt.heading"),
-            labelClass=Some("visually-hidden")
+            legend = messages("someOptions.heading"),
+            legendClass = Some("visually-hidden"),
+            inputs = SomeOptions.options.toSeq
         )
 
         @components.submit_button()

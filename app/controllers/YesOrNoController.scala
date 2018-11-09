@@ -19,31 +19,33 @@ package controllers
 import javax.inject.Inject
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import connectors.DataCacheConnector
 import controllers.actions._
 import config.FrontendAppConfig
 import forms.YesOrNoFormProvider
 import models.{Mode, UserAnswers}
 import pages.YesOrNoPage
 import navigation.Navigator
-import views.html.yesOrNo
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import repositories.SessionRepository
+import views.html.YesOrNoView
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class YesOrNoController @Inject()(appConfig: FrontendAppConfig,
-                                         override val messagesApi: MessagesApi,
-                                         dataCacheConnector: DataCacheConnector,
-                                         navigator: Navigator,
-                                         identify: IdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
-                                         formProvider: YesOrNoFormProvider
-                                         ) extends FrontendController with I18nSupport {
+                                  override val messagesApi: MessagesApi,
+                                  sessionRepository: SessionRepository,
+                                  navigator: Navigator,
+                                  identify: IdentifierAction,
+                                  getData: DataRetrievalAction,
+                                  requireData: DataRequiredAction,
+                                  formProvider: YesOrNoFormProvider,
+                                  val controllerComponents: MessagesControllerComponents,
+                                  view: YesOrNoView
+                                         )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form: Form[Boolean] = formProvider()
 
-  def onPageLoad(mode: Mode) = (identify andThen getData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
 
       val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.internalId)).get(YesOrNoPage) match {
@@ -51,19 +53,20 @@ class YesOrNoController @Inject()(appConfig: FrontendAppConfig,
         case Some(value) => form.fill(value)
       }
 
-      Ok(yesOrNo(appConfig, preparedForm, mode))
+      Ok(view(appConfig, preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode) = (identify andThen getData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(yesOrNo(appConfig, formWithErrors, mode))),
-        (value) => {
+          Future.successful(BadRequest(view(appConfig, formWithErrors, mode))),
+
+        value => {
           val updatedAnswers = request.userAnswers.getOrElse(UserAnswers(request.internalId)).set(YesOrNoPage, value)
 
-          dataCacheConnector.save(updatedAnswers.cacheMap).map(
+          sessionRepository.set(updatedAnswers.userData).map(
             _ =>
               Redirect(navigator.nextPage(YesOrNoPage, mode)(updatedAnswers))
           )

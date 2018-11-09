@@ -20,5 +20,5 @@ import models.SomeOptions
 
 case object SomeOptionsPage extends QuestionPage[SomeOptions] {
 
-  override def toString: String = "someOptions"
+  override def toString: String = "SomeOptionsView"
 }

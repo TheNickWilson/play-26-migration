@@ -17,6 +17,10 @@
 @import config.FrontendAppConfig
 @import viewmodels.{Section, AnswerSection, RepeaterAnswerSection}
 
+@this(
+    main_template: MainTemplate
+)
+
 @(appConfig: FrontendAppConfig, answerSections: Seq[Section])(implicit request: Request[_], messages: Messages)
 
 @main_template(

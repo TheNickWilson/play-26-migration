@@ -16,84 +16,125 @@
 
 package controllers
 
-import play.api.data.Form
-import play.api.libs.json.JsNumber
-import uk.gov.hmrc.http.cache.client.CacheMap
-import navigation.FakeNavigator
-import connectors.FakeDataCacheConnector
-import controllers.actions._
+import play.api.libs.json.{JsNumber, Json}
+import navigation.{FakeNavigator, Navigator}
 import play.api.test.Helpers._
 import forms.SomeIntFormProvider
-import models.NormalMode
+import models.{NormalMode, UserData}
 import pages.SomeIntPage
 import play.api.mvc.Call
-import views.html.someInt
+import play.api.test.FakeRequest
+import views.html.SomeIntView
+import play.api.inject.bind
 
 class SomeIntControllerSpec extends ControllerSpecBase {
-
-  def onwardRoute = Call("GET", "/foo")
 
   val formProvider = new SomeIntFormProvider()
   val form = formProvider()
 
-  def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new SomeIntController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(onwardRoute), FakeIdentifierAction,
-      dataRetrievalAction, new DataRequiredActionImpl, formProvider)
+  def onwardRoute = Call("GET", "/foo")
 
-  def viewAsString(form: Form[_] = form) = someInt(frontendAppConfig, form, NormalMode)(fakeRequest, messages).toString
+  val someIntRoute = routes.SomeIntController.onPageLoad(NormalMode).url
 
-  val testNumber = 0
-
-  "SomeInt Controller" must {
+  "SomeIntView Controller" must {
 
     "return OK and the correct view for a GET" in {
-      val result = controller().onPageLoad(NormalMode)(fakeRequest)
 
-      status(result) mustBe OK
-      contentAsString(result) mustBe viewAsString()
+      val application = applicationBuilder(userData = Some(emptyUserData)).build()
+
+      val request = FakeRequest(GET, someIntRoute)
+
+      val result = route(application, request).value
+
+      val view = application.injector.instanceOf[SomeIntView]
+
+      status(result) mustEqual OK
+
+      contentAsString(result) mustEqual
+        view(frontendAppConfig, form, NormalMode)(fakeRequest, messages).toString
     }
 
     "populate the view correctly on a GET when the question has previously been answered" in {
-      val validData = Map(SomeIntPage.toString -> JsNumber(testNumber))
-      val getRelevantData = new FakeDataRetrievalAction(Some(CacheMap(cacheMapId, validData)))
 
-      val result = controller(getRelevantData).onPageLoad(NormalMode)(fakeRequest)
+      val userData = UserData(userDataId, Json.obj(SomeIntPage.toString -> JsNumber(1)))
 
-      contentAsString(result) mustBe viewAsString(form.fill(testNumber))
+      val application = applicationBuilder(userData = Some(userData)).build()
+
+      val request = FakeRequest(GET, someIntRoute)
+
+      val view = application.injector.instanceOf[SomeIntView]
+
+      val result = route(application, request).value
+
+      status(result) mustEqual OK
+
+      contentAsString(result) mustEqual
+        view(frontendAppConfig, form.fill(1), NormalMode)(fakeRequest, messages).toString
     }
 
     "redirect to the next page when valid data is submitted" in {
-      val postRequest = fakeRequest.withFormUrlEncodedBody(("value", testNumber.toString))
 
-      val result = controller().onSubmit(NormalMode)(postRequest)
+      val application =
+        applicationBuilder(userData = Some(emptyUserData))
+          .overrides(bind[Navigator].toInstance(new FakeNavigator(onwardRoute)))
+          .build()
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(onwardRoute.url)
+      val request =
+        FakeRequest(POST, someIntRoute)
+          .withFormUrlEncodedBody(("value", "1"))
+
+      val result = route(application, request).value
+
+      status(result) mustEqual SEE_OTHER
+
+      redirectLocation(result).value mustEqual onwardRoute.url
     }
 
     "return a Bad Request and errors when invalid data is submitted" in {
-      val postRequest = fakeRequest.withFormUrlEncodedBody(("value", "invalid value"))
+
+      val application = applicationBuilder(userData = Some(emptyUserData)).build()
+
+      val request =
+        FakeRequest(POST, someIntRoute)
+          .withFormUrlEncodedBody(("value", "invalid value"))
+
       val boundForm = form.bind(Map("value" -> "invalid value"))
 
-      val result = controller().onSubmit(NormalMode)(postRequest)
+      val view = application.injector.instanceOf[SomeIntView]
 
-      status(result) mustBe BAD_REQUEST
-      contentAsString(result) mustBe viewAsString(boundForm)
+      val result = route(application, request).value
+
+      status(result) mustEqual BAD_REQUEST
+
+      contentAsString(result) mustEqual
+        view(frontendAppConfig, boundForm, NormalMode)(fakeRequest, messages).toString
     }
 
     "redirect to Session Expired for a GET if no existing data is found" in {
-      val result = controller(dontGetAnyData).onPageLoad(NormalMode)(fakeRequest)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+      val application = applicationBuilder(userData = None).build()
+
+      val request = FakeRequest(GET, someIntRoute)
+
+      val result = route(application, request).value
+
+      status(result) mustEqual SEE_OTHER
+      redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
     }
 
     "redirect to Session Expired for a POST if no existing data is found" in {
-      val postRequest = fakeRequest.withFormUrlEncodedBody(("value", testNumber.toString))
-      val result = controller(dontGetAnyData).onSubmit(NormalMode)(postRequest)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+      val application = applicationBuilder(userData = None).build()
+
+      val request =
+        FakeRequest(POST, someIntRoute)
+          .withFormUrlEncodedBody(("value", "1"))
+
+      val result = route(application, request).value
+
+      status(result) mustEqual SEE_OTHER
+
+      redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
     }
   }
 }

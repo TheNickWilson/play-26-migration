@@ -20,5 +20,5 @@ import models.SomeQuestion
 
 case object SomeQuestionPage extends QuestionPage[SomeQuestion] {
 
-  override def toString: String = "someQuestion"
+  override def toString: String = "SomeQuestionView"
 }

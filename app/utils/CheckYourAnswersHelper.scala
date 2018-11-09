@@ -36,7 +36,7 @@ class CheckYourAnswersHelper(userAnswers: UserAnswers) {
   }
 
   def someOptions: Option[AnswerRow] = userAnswers.get(SomeOptionsPage) map {
-    x => AnswerRow("someOptions.checkYourAnswersLabel", s"someOptions.$x", true, routes.SomeOptionsController.onPageLoad(CheckMode).url)
+    x => AnswerRow("someOptions.checkYourAnswersLabel", s"SomeOptionsView.$x", true, routes.SomeOptionsController.onPageLoad(CheckMode).url)
   }
 
   def someInt: Option[AnswerRow] = userAnswers.get(SomeIntPage) map {

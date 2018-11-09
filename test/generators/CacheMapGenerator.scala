@@ -16,11 +16,11 @@
 
 package generators
 
+import models.UserData
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 import pages._
-import play.api.libs.json.JsValue
-import uk.gov.hmrc.http.cache.client.CacheMap
+import play.api.libs.json.{JsValue, Json}
 
 trait CacheMapGenerator {
   self: Generators =>
@@ -33,7 +33,7 @@ trait CacheMapGenerator {
     arbitrary[(SomeIntPage.type, JsValue)] ::
     Nil
 
-  implicit lazy val arbitraryCacheMap: Arbitrary[CacheMap] =
+  implicit lazy val arbitraryCacheMap: Arbitrary[UserData] =
     Arbitrary {
       for {
         cacheId <- nonEmptyString
@@ -41,11 +41,11 @@ trait CacheMapGenerator {
           case Nil => Gen.const(Map[Page, JsValue]())
           case _   => Gen.mapOf(oneOf(generators))
         }
-      } yield CacheMap(
+      } yield UserData(
         cacheId,
         data.map {
-          case (k, v) => ( k.toString, v )
-        }
+          case (k, v) => Json.obj(k.toString -> v)
+        }.foldLeft(Json.obj())(_ ++ _)
       )
     }
 }

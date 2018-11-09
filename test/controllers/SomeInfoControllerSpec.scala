@@ -16,25 +16,28 @@
 
 package controllers
 
-import controllers.actions._
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import views.html.someInfo
+import views.html.SomeInfoView
 
 class SomeInfoControllerSpec extends ControllerSpecBase {
-
-  def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new SomeInfoController(frontendAppConfig, messagesApi, FakeIdentifierAction,
-      dataRetrievalAction, new DataRequiredActionImpl)
-
-  def viewAsString() = someInfo(frontendAppConfig)(fakeRequest, messages).toString
 
   "SomeInfo Controller" must {
 
     "return OK and the correct view for a GET" in {
-      val result = controller().onPageLoad(fakeRequest)
 
-      status(result) mustBe OK
-      contentAsString(result) mustBe viewAsString()
+      val application = applicationBuilder(userData = Some(emptyUserData)).build()
+
+      val request = FakeRequest(GET, routes.SomeInfoController.onPageLoad().url)
+
+      val result = route(application, request).value
+
+      val view = application.injector.instanceOf[SomeInfoView]
+
+      status(result) mustEqual OK
+
+      contentAsString(result) mustEqual
+        view(frontendAppConfig)(fakeRequest, messages).toString
     }
   }
 }

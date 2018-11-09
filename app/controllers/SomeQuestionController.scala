@@ -16,35 +16,36 @@
 
 package controllers
 
+import config.FrontendAppConfig
+import controllers.actions._
+import forms.SomeQuestionFormProvider
 import javax.inject.Inject
-
+import models.Mode
+import navigation.Navigator
+import pages.SomeQuestionPage
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import connectors.DataCacheConnector
-import controllers.actions._
-import config.FrontendAppConfig
-import forms.SomeQuestionFormProvider
-import models.Mode
-import pages.SomeQuestionPage
-import navigation.Navigator
-import views.html.someQuestion
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import repositories.SessionRepository
+import views.html.SomeQuestionView
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class SomeQuestionController @Inject()(appConfig: FrontendAppConfig,
-                                      override val messagesApi: MessagesApi,
-                                      dataCacheConnector: DataCacheConnector,
-                                      navigator: Navigator,
-                                      identify: IdentifierAction,
-                                      getData: DataRetrievalAction,
-                                      requireData: DataRequiredAction,
-                                      formProvider: SomeQuestionFormProvider
-                                      ) extends FrontendController with I18nSupport {
+                                       override val messagesApi: MessagesApi,
+                                       sessionRepository: SessionRepository,
+                                       navigator: Navigator,
+                                       identify: IdentifierAction,
+                                       getData: DataRetrievalAction,
+                                       requireData: DataRequiredAction,
+                                       formProvider: SomeQuestionFormProvider,
+                                       val controllerComponents: MessagesControllerComponents,
+                                       view: SomeQuestionView
+                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode) = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
 
       val preparedForm = request.userAnswers.get(SomeQuestionPage) match {
@@ -52,19 +53,20 @@ class SomeQuestionController @Inject()(appConfig: FrontendAppConfig,
         case Some(value) => form.fill(value)
       }
 
-      Ok(someQuestion(appConfig, preparedForm, mode))
+      Ok(view(appConfig, preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode) = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(someQuestion(appConfig, formWithErrors, mode))),
-        (value) => {
+          Future.successful(BadRequest(view(appConfig, formWithErrors, mode))),
+
+        value => {
           val updatedAnswers = request.userAnswers.set(SomeQuestionPage, value)
 
-          dataCacheConnector.save(updatedAnswers.cacheMap).map(
+          sessionRepository.set(updatedAnswers.userData).map(
             _ =>
               Redirect(navigator.nextPage(SomeQuestionPage, mode)(updatedAnswers))
           )

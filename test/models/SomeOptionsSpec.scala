@@ -24,7 +24,7 @@ import play.api.libs.json.{JsError, JsString, Json}
 
 class SomeOptionsSpec extends WordSpec with MustMatchers with PropertyChecks with OptionValues {
 
-  "SomeOptions" must {
+  "SomeOptionsView" must {
 
     "deserialise valid values" in {
 
@@ -44,7 +44,7 @@ class SomeOptionsSpec extends WordSpec with MustMatchers with PropertyChecks wit
       forAll(gen) {
         invalidValue =>
 
-          JsString(invalidValue).validate[SomeOptions] mustEqual JsError("Unknown someOptions")
+          JsString(invalidValue).validate[SomeOptions] mustEqual JsError("Unknown SomeOptionsView")
       }
     }
 

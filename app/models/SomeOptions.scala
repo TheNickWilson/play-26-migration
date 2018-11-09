@@ -32,7 +32,7 @@ object SomeOptions {
 
   val options: Set[RadioOption] = values.map {
     value =>
-      RadioOption("someOptions", value.toString)
+      RadioOption("SomeOptionsView", value.toString)
   }
 
   implicit val enumerable: Enumerable[SomeOptions] =
@@ -46,7 +46,7 @@ object SomeOptions {
     override def reads(json: JsValue): JsResult[SomeOptions] = json match {
       case JsString(Option1.toString) => JsSuccess(Option1)
       case JsString(Option2.toString) => JsSuccess(Option2)
-      case _                          => JsError("Unknown someOptions")
+      case _                          => JsError("Unknown SomeOptionsView")
     }
   }
 }

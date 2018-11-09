@@ -16,17 +16,29 @@
 
 package controllers
 
-import uk.gov.hmrc.http.cache.client.CacheMap
 import base.SpecBase
-import controllers.actions.FakeDataRetrievalAction
+import controllers.actions._
+import models.UserData
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.Json
 
-trait ControllerSpecBase extends SpecBase {
+trait ControllerSpecBase extends SpecBase with GuiceOneAppPerSuite {
 
-  val cacheMapId = "id"
+  val userDataId = "id"
 
-  def emptyCacheMap = CacheMap(cacheMapId, Map())
+  def emptyUserData = UserData(userDataId, Json.obj())
 
-  def getEmptyCacheMap = new FakeDataRetrievalAction(Some(emptyCacheMap))
+  def getEmptyUserData = new FakeDataRetrievalAction(Some(emptyUserData))
 
   def dontGetAnyData = new FakeDataRetrievalAction(None)
+
+  protected def applicationBuilder(userData: Option[UserData] = None): GuiceApplicationBuilder =
+    new GuiceApplicationBuilder()
+      .overrides(
+        bind[DataRequiredAction].to[DataRequiredActionImpl],
+        bind[IdentifierAction].toInstance(FakeIdentifierAction),
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userData))
+      )
 }

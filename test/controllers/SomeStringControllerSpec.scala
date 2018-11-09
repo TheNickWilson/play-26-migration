@@ -16,18 +16,16 @@
 
 package controllers
 
-import play.api.data.Form
-import play.api.libs.json.JsString
-import uk.gov.hmrc.http.cache.client.CacheMap
-import navigation.FakeNavigator
-import connectors.FakeDataCacheConnector
-import controllers.actions._
-import play.api.test.Helpers._
 import forms.SomeStringFormProvider
-import models.NormalMode
+import models.{NormalMode, UserData}
+import navigation.{FakeNavigator, Navigator}
 import pages.SomeStringPage
+import play.api.inject.bind
+import play.api.libs.json.{JsString, Json}
 import play.api.mvc.Call
-import views.html.someString
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import views.html.{SomeIntView, SomeStringView}
 
 class SomeStringControllerSpec extends ControllerSpecBase {
 
@@ -36,64 +34,107 @@ class SomeStringControllerSpec extends ControllerSpecBase {
   val formProvider = new SomeStringFormProvider()
   val form = formProvider()
 
-  def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new SomeStringController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(onwardRoute), FakeIdentifierAction,
-      dataRetrievalAction, new DataRequiredActionImpl, formProvider)
+  val someStringRoute = routes.SomeStringController.onPageLoad(NormalMode).url
 
-  def viewAsString(form: Form[_] = form) = someString(frontendAppConfig, form, NormalMode)(fakeRequest, messages).toString
-
-  val testAnswer = "answer"
-
-  "SomeString Controller" must {
+  "SomeStringView Controller" must {
 
     "return OK and the correct view for a GET" in {
-      val result = controller().onPageLoad(NormalMode)(fakeRequest)
 
-      status(result) mustBe OK
-      contentAsString(result) mustBe viewAsString()
+      val application = applicationBuilder(userData = Some(emptyUserData)).build()
+
+      val request = FakeRequest(GET, someStringRoute)
+
+      val result = route(application, request).value
+
+      val view = application.injector.instanceOf[SomeStringView]
+
+      status(result) mustEqual OK
+
+      contentAsString(result) mustEqual
+        view(frontendAppConfig, form, NormalMode)(fakeRequest, messages).toString
     }
 
     "populate the view correctly on a GET when the question has previously been answered" in {
-      val validData = Map(SomeStringPage.toString -> JsString(testAnswer))
-      val getRelevantData = new FakeDataRetrievalAction(Some(CacheMap(cacheMapId, validData)))
 
-      val result = controller(getRelevantData).onPageLoad(NormalMode)(fakeRequest)
+      val userData = UserData(userDataId, Json.obj(SomeStringPage.toString -> JsString("answer")))
 
-      contentAsString(result) mustBe viewAsString(form.fill(testAnswer))
+      val application = applicationBuilder(userData = Some(userData)).build()
+
+      val request = FakeRequest(GET, someStringRoute)
+
+      val view = application.injector.instanceOf[SomeIntView]
+
+      val result = route(application, request).value
+
+      status(result) mustEqual OK
+
+      contentAsString(result) mustEqual
+        view(frontendAppConfig, form.fill("answer"), NormalMode)(fakeRequest, messages).toString
     }
 
     "redirect to the next page when valid data is submitted" in {
-      val postRequest = fakeRequest.withFormUrlEncodedBody(("value", testAnswer))
 
-      val result = controller().onSubmit(NormalMode)(postRequest)
+      val application =
+        applicationBuilder(userData = Some(emptyUserData))
+          .overrides(bind[Navigator].toInstance(new FakeNavigator(onwardRoute)))
+          .build()
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(onwardRoute.url)
+      val request =
+        FakeRequest(POST, someStringRoute)
+          .withFormUrlEncodedBody(("value", "answer"))
+
+      val result = route(application, request).value
+
+      status(result) mustEqual SEE_OTHER
+      redirectLocation(result).value mustEqual onwardRoute.url
     }
 
     "return a Bad Request and errors when invalid data is submitted" in {
-      val postRequest = fakeRequest.withFormUrlEncodedBody(("value", ""))
+
+      val application = applicationBuilder(userData = Some(emptyUserData)).build()
+
+      val request =
+        FakeRequest(POST, someStringRoute)
+          .withFormUrlEncodedBody(("value", ""))
+
       val boundForm = form.bind(Map("value" -> ""))
 
-      val result = controller().onSubmit(NormalMode)(postRequest)
+      val view = application.injector.instanceOf[SomeIntView]
 
-      status(result) mustBe BAD_REQUEST
-      contentAsString(result) mustBe viewAsString(boundForm)
+      val result = route(application, request).value
+
+      status(result) mustEqual BAD_REQUEST
+
+      contentAsString(result) mustEqual
+        view(frontendAppConfig, boundForm, NormalMode)(fakeRequest, messages).toString
     }
 
     "redirect to Session Expired for a GET if no existing data is found" in {
-      val result = controller(dontGetAnyData).onPageLoad(NormalMode)(fakeRequest)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+      val application = applicationBuilder(userData = None).build()
+
+      val request = FakeRequest(GET, someStringRoute)
+
+      val result = route(application, request).value
+
+      status(result) mustEqual SEE_OTHER
+
+      redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
     }
 
     "redirect to Session Expired for a POST if no existing data is found" in {
-      val postRequest = fakeRequest.withFormUrlEncodedBody(("value", testAnswer))
-      val result = controller(dontGetAnyData).onSubmit(NormalMode)(postRequest)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+      val application = applicationBuilder(userData = None).build()
+
+      val request =
+        FakeRequest(POST, someStringRoute)
+          .withFormUrlEncodedBody(("value", "1"))
+
+      val result = route(application, request).value
+
+      status(result) mustEqual SEE_OTHER
+
+      redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
     }
   }
 }

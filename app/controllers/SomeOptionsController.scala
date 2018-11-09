@@ -16,36 +16,37 @@
 
 package controllers
 
+import config.FrontendAppConfig
+import controllers.actions._
+import forms.SomeOptionsFormProvider
 import javax.inject.Inject
-
+import models.{Enumerable, Mode}
+import navigation.Navigator
+import pages.SomeOptionsPage
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import connectors.DataCacheConnector
-import controllers.actions._
-import config.FrontendAppConfig
-import forms.SomeOptionsFormProvider
-import models.{Enumerable, Mode}
-import pages.SomeOptionsPage
-import navigation.Navigator
-import views.html.someOptions
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import repositories.SessionRepository
+import views.html.SomeOptionsView
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class SomeOptionsController @Inject()(
-                                        appConfig: FrontendAppConfig,
-                                        override val messagesApi: MessagesApi,
-                                        dataCacheConnector: DataCacheConnector,
-                                        navigator: Navigator,
-                                        identify: IdentifierAction,
-                                        getData: DataRetrievalAction,
-                                        requireData: DataRequiredAction,
-                                        formProvider: SomeOptionsFormProvider
-                                      ) extends FrontendController with I18nSupport with Enumerable.Implicits {
+                                       appConfig: FrontendAppConfig,
+                                       override val messagesApi: MessagesApi,
+                                       sessionRepository: SessionRepository,
+                                       navigator: Navigator,
+                                       identify: IdentifierAction,
+                                       getData: DataRetrievalAction,
+                                       requireData: DataRequiredAction,
+                                       formProvider: SomeOptionsFormProvider,
+                                       val controllerComponents: MessagesControllerComponents,
+                                       view: SomeOptionsView
+                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Enumerable.Implicits {
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode) = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
 
       val preparedForm = request.userAnswers.get(SomeOptionsPage) match {
@@ -53,19 +54,20 @@ class SomeOptionsController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(someOptions(appConfig, preparedForm, mode))
+      Ok(view(appConfig, preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode) = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(someOptions(appConfig, formWithErrors, mode))),
-        (value) => {
+          Future.successful(BadRequest(view(appConfig, formWithErrors, mode))),
+
+        value => {
           val updatedAnswers = request.userAnswers.set(SomeOptionsPage, value)
 
-          dataCacheConnector.save(updatedAnswers.cacheMap).map(
+          sessionRepository.set(updatedAnswers.userData).map(
             _ =>
               Redirect(navigator.nextPage(SomeOptionsPage, mode)(updatedAnswers))
           )

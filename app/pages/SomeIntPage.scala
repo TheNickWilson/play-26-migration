@@ -18,5 +18,5 @@ package pages
 
 case object SomeIntPage extends QuestionPage[Int] {
 
-  override def toString: String = "someInt"
+  override def toString: String = "SomeIntView"
 }
