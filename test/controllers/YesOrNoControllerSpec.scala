@@ -34,7 +34,7 @@ class YesOrNoControllerSpec extends ControllerSpecBase {
   val formProvider = new YesOrNoFormProvider()
   val form = formProvider()
 
-  val yesOrNoRoute = routes.YesOrNoController.onPageLoad(NormalMode).url
+  lazy val yesOrNoRoute = routes.YesOrNoController.onPageLoad(NormalMode).url
 
   "YesOrNo Controller" must {
 

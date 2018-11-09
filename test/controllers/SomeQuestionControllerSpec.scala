@@ -38,11 +38,10 @@ import navigation.{FakeNavigator, Navigator}
 import pages.SomeQuestionPage
 import play.api.inject.bind
 import play.api.libs.json.Json
-import play.api.mvc.{AnyContent, AnyContentAsEmpty, Call, Request}
+import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.SomeQuestionView
-import play.api.test.CSRFTokenHelper.CSRFRequest
 
 class SomeQuestionControllerSpec extends ControllerSpecBase {
 
@@ -51,7 +50,7 @@ class SomeQuestionControllerSpec extends ControllerSpecBase {
   val formProvider = new SomeQuestionFormProvider()
   val form = formProvider()
 
-  val someQuestionRoute = routes.SomeQuestionController.onPageLoad(NormalMode).url
+  lazy val someQuestionRoute = routes.SomeQuestionController.onPageLoad(NormalMode).url
 
   val userData = UserData(
     userDataId,
@@ -63,13 +62,13 @@ class SomeQuestionControllerSpec extends ControllerSpecBase {
     )
   )
 
-  "SomeQuestionView Controller" must {
+  "SomeQuestion Controller" must {
 
     "return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userData = Some(emptyUserData)).build()
 
-      val request = FakeRequest(GET, someQuestionRoute).withCSRFToken
+      val request = FakeRequest(GET, someQuestionRoute)
 
       val view = application.injector.instanceOf[SomeQuestionView]
 
@@ -85,7 +84,7 @@ class SomeQuestionControllerSpec extends ControllerSpecBase {
 
       val application = applicationBuilder(userData = Some(userData)).build()
 
-      val request = FakeRequest(GET, someQuestionRoute).withCSRFToken
+      val request = FakeRequest(GET, someQuestionRoute)
 
       val view = application.injector.instanceOf[SomeQuestionView]
 
@@ -107,7 +106,6 @@ class SomeQuestionControllerSpec extends ControllerSpecBase {
       val request =
         FakeRequest(POST, someQuestionRoute)
           .withFormUrlEncodedBody(("field1", "value 1"), ("field2", "value 2"))
-          .withCSRFToken
 
       val result = route(application, request).value
 
@@ -123,7 +121,6 @@ class SomeQuestionControllerSpec extends ControllerSpecBase {
       val request =
         FakeRequest(POST, someQuestionRoute)
           .withFormUrlEncodedBody(("value", "invalid value"))
-          .withCSRFToken
 
       val boundForm = form.bind(Map("value" -> "invalid value"))
 
@@ -141,7 +138,7 @@ class SomeQuestionControllerSpec extends ControllerSpecBase {
 
       val application = applicationBuilder(userData = None).build()
 
-      val request = FakeRequest(GET, someQuestionRoute).withCSRFToken
+      val request = FakeRequest(GET, someQuestionRoute)
 
       val result = route(application, request).value
 
@@ -156,7 +153,6 @@ class SomeQuestionControllerSpec extends ControllerSpecBase {
       val request =
         FakeRequest(POST, someQuestionRoute)
           .withFormUrlEncodedBody(("field1", "value 1"), ("field2", "value 2"))
-          .withCSRFToken
 
       val result = route(application, request).value
 

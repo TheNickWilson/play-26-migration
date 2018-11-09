@@ -47,7 +47,7 @@ trait SpecBase extends PlaySpec with GuiceOneAppPerSuite {
     new GuiceApplicationBuilder()
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
-        bind[IdentifierAction].toInstance(FakeIdentifierAction),
+        bind[IdentifierAction].to[FakeIdentifierAction],
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userData))
       )
 }

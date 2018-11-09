@@ -34,9 +34,9 @@ class SomeStringControllerSpec extends ControllerSpecBase {
   val formProvider = new SomeStringFormProvider()
   val form = formProvider()
 
-  val someStringRoute = routes.SomeStringController.onPageLoad(NormalMode).url
+  lazy val someStringRoute = routes.SomeStringController.onPageLoad(NormalMode).url
 
-  "SomeStringView Controller" must {
+  "SomeString Controller" must {
 
     "return OK and the correct view for a GET" in {
 
